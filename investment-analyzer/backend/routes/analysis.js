@@ -206,11 +206,11 @@ function calculateBreakEvenAnalysis(params) {
       totalInvested += annualInvestment;
     }
 
+    // Calculate annual return from portfolio BEFORE applying growth
+    const annualReturn = portfolioValue * expectedReturn;
+
     // Apply returns to the portfolio (this happens regardless of whether we're still investing)
     portfolioValue *= 1 + expectedReturn;
-
-    // Calculate annual return from portfolio
-    const annualReturn = portfolioValue * expectedReturn;
 
     // Calculate monthly return from portfolio for self-sustainability check
     const monthlyReturn = annualReturn / 12;
@@ -226,8 +226,12 @@ function calculateBreakEvenAnalysis(params) {
       selfSustainabilityAge = age;
     }
 
-    // Store data for charts (limit chart data to first 60 years for performance)
-    if (age <= currentAge + 60) {
+    // Store data for charts (limit chart data to first 60 years for performance, but always include time horizon)
+    const chartLimit = Math.max(
+      currentAge + 60,
+      currentAge + investmentTimeHorizon
+    );
+    if (age <= chartLimit) {
       projectionData.ages.push(age);
       projectionData.portfolioValues.push(Math.round(portfolioValue));
       projectionData.annualReturns.push(Math.round(annualReturn));
@@ -240,11 +244,14 @@ function calculateBreakEvenAnalysis(params) {
     }
 
     // If we found both break-even and self-sustainability and have sufficient chart data, we can stop
-    if (
-      breakEvenAge &&
-      selfSustainabilityAge &&
-      age >= Math.max(breakEvenAge, selfSustainabilityAge) + 5
-    ) {
+    // But always continue until at least the time horizon age
+    const minRequiredAge = Math.max(
+      breakEvenAge ? breakEvenAge + 5 : 0,
+      selfSustainabilityAge ? selfSustainabilityAge + 5 : 0,
+      currentAge + investmentTimeHorizon
+    );
+
+    if (breakEvenAge && selfSustainabilityAge && age >= minRequiredAge) {
       break;
     }
   }
@@ -257,6 +264,27 @@ function calculateBreakEvenAnalysis(params) {
   const finalExpenses =
     projectionData.annualExpenses[projectionData.annualExpenses.length - 1];
   const currentMonthlySIP = (startingSalary * investmentRatio) / 12;
+
+  // Calculate portfolio value at investment time horizon
+  const timeHorizonAge = currentAge + investmentTimeHorizon;
+  const timeHorizonIndex = projectionData.ages.indexOf(timeHorizonAge);
+
+  const portfolioValueAtTimeHorizon =
+    timeHorizonIndex >= 0
+      ? projectionData.portfolioValues[timeHorizonIndex]
+      : null;
+
+  const totalInvestedAtTimeHorizon =
+    timeHorizonIndex >= 0
+      ? projectionData.cumulativeInvestments[timeHorizonIndex]
+      : totalInvested;
+
+  // Calculate inflation-adjusted value of portfolio at time horizon
+  // This shows what the portfolio value means in today's purchasing power
+  const inflationAdjustedPortfolioValue = portfolioValueAtTimeHorizon
+    ? portfolioValueAtTimeHorizon /
+      Math.pow(1 + inflationRate, investmentTimeHorizon)
+    : null;
 
   // Calculate required SIP for earlier break-even (if no break-even found)
   let requiredMonthlySIP = null;
@@ -285,9 +313,9 @@ function calculateBreakEvenAnalysis(params) {
         const testInvestment = testSalary * testRatio;
 
         testPortfolio += testInvestment;
-        testPortfolio *= 1 + expectedReturn;
 
         const testReturn = testPortfolio * expectedReturn;
+        testPortfolio *= 1 + expectedReturn;
         if (testReturn >= testExpenses) {
           testBreakEven = age;
         }
@@ -317,7 +345,11 @@ function calculateBreakEvenAnalysis(params) {
 
   return {
     breakEvenAge,
-    portfolioValue: finalPortfolioValue,
+    portfolioValue: breakEvenAge
+      ? projectionData.portfolioValues[
+          projectionData.ages.indexOf(breakEvenAge)
+        ]
+      : finalPortfolioValue, // fallback to final value if no break-even
     annualReturn: finalAnnualReturn,
     annualExpenses: finalExpenses,
     totalInvested: Math.round(totalInvested),
@@ -325,6 +357,15 @@ function calculateBreakEvenAnalysis(params) {
     monthlySipNeeded: Math.round(currentMonthlySIP),
     requiredMonthlySIP: requiredMonthlySIP
       ? Math.round(requiredMonthlySIP)
+      : null,
+    // Time horizon specific metrics
+    timeHorizonAge,
+    portfolioValueAtTimeHorizon: portfolioValueAtTimeHorizon
+      ? Math.round(portfolioValueAtTimeHorizon)
+      : null,
+    totalInvestedAtTimeHorizon: Math.round(totalInvestedAtTimeHorizon),
+    inflationAdjustedPortfolioValue: inflationAdjustedPortfolioValue
+      ? Math.round(inflationAdjustedPortfolioValue)
       : null,
     // New self-sustainability metrics
     selfSustainabilityAge,
@@ -612,3 +653,4 @@ function calculateRealisticExpenses({
 }
 
 module.exports = router;
+module.exports.calculateBreakEvenAnalysis = calculateBreakEvenAnalysis;

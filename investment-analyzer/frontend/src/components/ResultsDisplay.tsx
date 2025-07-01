@@ -35,6 +35,11 @@ interface AnalysisResults {
   requiredMonthlySIP: number | null;
   breakEvenPortfolioValue: number | null;
   financialIndependenceRatio: number;
+  // Time horizon specific fields
+  timeHorizonAge?: number;
+  portfolioValueAtTimeHorizon?: number | null;
+  totalInvestedAtTimeHorizon?: number;
+  inflationAdjustedPortfolioValue?: number | null;
   // New self-sustainability fields
   selfSustainabilityAge?: number | null;
   yearsToSelfSustainability?: number | null;
@@ -424,6 +429,137 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
             </p>
           </div>
         </div>
+
+        {/* Time Horizon Portfolio Analysis */}
+        {results.timeHorizonAge && results.portfolioValueAtTimeHorizon && (
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-200 flex items-center">
+                <Target className="h-6 w-6 mr-2 text-blue-600 dark:text-blue-400" />
+                Portfolio After{" "}
+                {results.timeHorizonAge -
+                  (results.metadata?.parameters?.currentAge || 25)}{" "}
+                Years of Investment (Age {results.timeHorizonAge})
+              </h3>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-blue-100 dark:border-blue-700">
+                <div className="flex items-center justify-between mb-2">
+                  <PiggyBank className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                  <span className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                    {formatCurrency(results.portfolioValueAtTimeHorizon)}
+                  </span>
+                </div>
+                <p className="text-blue-600 dark:text-blue-400 font-medium">
+                  Portfolio Value (Nominal)
+                </p>
+                <p className="text-xs text-blue-500 dark:text-blue-400 mt-1">
+                  After{" "}
+                  {results.timeHorizonAge -
+                    (results.metadata?.parameters?.currentAge || 25)}{" "}
+                  years of investing
+                </p>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-green-100 dark:border-green-700">
+                <div className="flex items-center justify-between mb-2">
+                  <BarChart3 className="h-8 w-8 text-green-600 dark:text-green-400" />
+                  <span className="text-2xl font-bold text-green-700 dark:text-green-300">
+                    {results.inflationAdjustedPortfolioValue
+                      ? formatCurrency(results.inflationAdjustedPortfolioValue)
+                      : "N/A"}
+                  </span>
+                </div>
+                <p className="text-green-600 dark:text-green-400 font-medium">
+                  Today's Purchasing Power
+                </p>
+                <p className="text-xs text-green-500 dark:text-green-400 mt-1">
+                  Inflation-adjusted value
+                </p>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-purple-100 dark:border-purple-700">
+                <div className="flex items-center justify-between mb-2">
+                  <Clock className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                  <span className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+                    {formatCurrency(results.totalInvestedAtTimeHorizon || 0)}
+                  </span>
+                </div>
+                <p className="text-purple-600 dark:text-purple-400 font-medium">
+                  Total Invested
+                </p>
+                <p className="text-xs text-purple-500 dark:text-purple-400 mt-1">
+                  Your contributions over{" "}
+                  {results.timeHorizonAge -
+                    (results.metadata?.parameters?.currentAge || 25)}{" "}
+                  years
+                </p>
+              </div>
+            </div>
+
+            {/* Wealth Multiplication Factor */}
+            {results.portfolioValueAtTimeHorizon &&
+              results.totalInvestedAtTimeHorizon && (
+                <div className="mt-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-700">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
+                        Wealth Multiplication Factor
+                      </h4>
+                      <p className="text-xs text-yellow-600 dark:text-yellow-300 mt-1">
+                        Your investment will grow by{" "}
+                        {(
+                          (results.portfolioValueAtTimeHorizon || 0) /
+                          (results.totalInvestedAtTimeHorizon || 1)
+                        ).toFixed(1)}
+                        x through compound returns
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xl font-bold text-yellow-700 dark:text-yellow-300">
+                        {(
+                          (results.portfolioValueAtTimeHorizon || 0) /
+                          (results.totalInvestedAtTimeHorizon || 1)
+                        ).toFixed(1)}
+                        x
+                      </div>
+                      <div className="text-xs text-yellow-600 dark:text-yellow-400">
+                        Return multiple
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            <div className="mt-4 text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/10 rounded-lg p-3">
+              <p className="font-medium mb-1">
+                💡 Understanding these numbers:
+              </p>
+              <ul className="space-y-1 list-disc list-inside">
+                <li>
+                  <strong>Portfolio Value (Nominal):</strong> The actual amount
+                  you'll have after{" "}
+                  {results.timeHorizonAge -
+                    (results.metadata?.parameters?.currentAge || 25)}{" "}
+                  years of investing (at age {results.timeHorizonAge})
+                </li>
+                <li>
+                  <strong>Today's Purchasing Power:</strong> What that money can
+                  buy in today's terms (accounting for{" "}
+                  {(
+                    (results.metadata?.parameters?.inflationRate || 0.06) * 100
+                  ).toFixed(1)}
+                  % annual inflation)
+                </li>
+                <li>
+                  <strong>Total Invested:</strong> The sum of all your monthly
+                  contributions over the investment period
+                </li>
+              </ul>
+            </div>
+          </div>
+        )}
 
         {/* Self-Sustainability Explanation */}
         {results.selfSustainabilityAge && (
