@@ -15,7 +15,17 @@ interface FinancialAllocationProps {
     emergencyFundRatio: number;
   };
   selectedStrategy: string;
-  allocationStrategies: Record<string, any>;
+  allocationStrategies: Record<
+    string,
+    {
+      name: string;
+      description: string;
+      needs: number;
+      wants: number;
+      investments: number;
+      emergencyFund: number;
+    }
+  >;
   tooltipVisible: string | null;
   onStrategyChange: (strategy: string) => void;
   onRatioChange: (field: string, value: number) => void;

@@ -87,7 +87,7 @@ interface AnalysisResults {
   };
   metadata?: {
     analysisDate: string;
-    parameters: any;
+    parameters: Record<string, unknown>;
   };
 }
 
@@ -1016,10 +1016,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
                   }}
                 />
                 <Tooltip
-                  formatter={(value: number, _name: string) => [
-                    `Age ${value}`,
-                    "Break-even Age",
-                  ]}
+                  formatter={(value: number) => [`Age ${value}`, "Break-even Age"]}
                   contentStyle={{
                     backgroundColor: "var(--tooltip-bg)",
                     borderColor: "var(--tooltip-border)",
