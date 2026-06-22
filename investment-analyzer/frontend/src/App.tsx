@@ -6,7 +6,7 @@ import {
   DollarSign,
   BarChart3,
   Lightbulb,
-  AlertTriangle,
+  
 } from "lucide-react";
 import AnalysisForm from "./components/AnalysisForm.tsx";
 import ResultsDisplay from "./components/ResultsDisplay.tsx";

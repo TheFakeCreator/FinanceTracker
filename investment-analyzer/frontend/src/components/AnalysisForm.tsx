@@ -1,16 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import {
-  Calculator,
-  Target,
-  Rocket,
-  Shield,
-  GraduationCap,
-  Leaf,
-  Wine,
-  Scale,
-  TrendingUp,
-  PieChart,
-} from "lucide-react";
+import { Calculator } from "lucide-react";
 import BasicInformation from "./sections/BasicInformation";
 import FinancialAllocation from "./sections/FinancialAllocation";
 import InvestmentStrategy from "./sections/InvestmentStrategy";
@@ -361,10 +350,12 @@ const AnalysisForm: React.FC<AnalysisFormProps> = ({
     formData.investmentBreakdown?.digitalGoldRatio,
     formData.investmentBreakdown?.othersRatio,
     monthlySalary,
+    debouncedAnalysis,
     // Removed debouncedAnalysis from dependencies to prevent recreation loop
   ]);
 
   // Initial analysis on component mount only
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!hasInitialAnalysisRun.current) {
       hasInitialAnalysisRun.current = true;
@@ -417,7 +408,10 @@ const AnalysisForm: React.FC<AnalysisFormProps> = ({
   };
 
   // Calculate expected return based on investment breakdown
-  const calculateExpectedReturn = (breakdown: any, customReturns?: any) => {
+  const calculateExpectedReturn = (
+    breakdown: AnalysisParams["investmentBreakdown"],
+    customReturns?: AnalysisParams["customReturns"]
+  ) => {
     // Use custom returns if provided and user has enabled custom returns, otherwise use defaults
     const expectedReturns =
       useCustomReturns && customReturns
