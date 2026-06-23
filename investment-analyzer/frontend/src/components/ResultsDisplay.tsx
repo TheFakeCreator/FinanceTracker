@@ -87,7 +87,7 @@ interface AnalysisResults {
   };
   metadata?: {
     analysisDate: string;
-    parameters: Record<string, unknown>;
+    parameters: any;
   };
 }
 
@@ -438,7 +438,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
                 <Target className="h-6 w-6 mr-2 text-blue-600 dark:text-blue-400" />
                 Portfolio After{" "}
                 {results.timeHorizonAge -
-                  (results.metadata?.parameters?.currentAge || 25)}{" "}
+                  (Number(results.metadata?.parameters?.currentAge) || 25)}{" "}
                 Years of Investment (Age {results.timeHorizonAge})
               </h3>
             </div>
@@ -457,7 +457,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
                 <p className="text-xs text-blue-500 dark:text-blue-400 mt-1">
                   After{" "}
                   {results.timeHorizonAge -
-                    (results.metadata?.parameters?.currentAge || 25)}{" "}
+                    (Number(results.metadata?.parameters?.currentAge) || 25)}{" "}
                   years of investing
                 </p>
               </div>
@@ -492,7 +492,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
                 <p className="text-xs text-purple-500 dark:text-purple-400 mt-1">
                   Your contributions over{" "}
                   {results.timeHorizonAge -
-                    (results.metadata?.parameters?.currentAge || 25)}{" "}
+                    (Number(results.metadata?.parameters?.currentAge) || 25)}{" "}
                   years
                 </p>
               </div>
@@ -541,14 +541,14 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
                   <strong>Portfolio Value (Nominal):</strong> The actual amount
                   you'll have after{" "}
                   {results.timeHorizonAge -
-                    (results.metadata?.parameters?.currentAge || 25)}{" "}
+                    (Number(results.metadata?.parameters?.currentAge) || 25)}{" "}
                   years of investing (at age {results.timeHorizonAge})
                 </li>
                 <li>
                   <strong>Today's Purchasing Power:</strong> What that money can
                   buy in today's terms (accounting for{" "}
                   {(
-                    (results.metadata?.parameters?.inflationRate || 0.06) * 100
+                    (Number(results.metadata?.parameters?.inflationRate) || 0.06) * 100
                   ).toFixed(1)}
                   % annual inflation)
                 </li>
@@ -862,11 +862,11 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
               breakEvenAge: results.breakEvenAge,
               portfolioValue: results.portfolioValue,
               monthlySipNeeded: results.monthlySipNeeded,
-              currentAge: results.metadata?.parameters?.currentAge || 25,
+              currentAge: Number(results.metadata?.parameters?.currentAge) || 25,
               investmentRatio:
                 results.allocationBreakdown?.investmentRatio || 0.2,
               expectedReturn:
-                results.metadata?.parameters?.expectedReturn || 0.12,
+                Number(results.metadata?.parameters?.expectedReturn) || 0.12,
               yearsToBreakEven: results.yearsToBreakEven,
               totalInvested: results.totalInvested,
               annualExpenses: results.annualExpenses,

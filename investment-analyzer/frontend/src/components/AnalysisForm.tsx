@@ -432,6 +432,9 @@ const AnalysisForm: React.FC<AnalysisFormProps> = ({
             others: 0.09, // 9% - Mixed alternatives like PPF, REITs, etc.
           };
 
+    if (!breakdown) return 0.12; // default fallback return
+
+
     const weightedReturn =
       breakdown.mutualFundsRatio * expectedReturns.mutualFunds +
       breakdown.stocksRatio * expectedReturns.stocks +
