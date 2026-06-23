@@ -45,7 +45,20 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
+// Serve frontend in production
+if (process.env.NODE_ENV === "production") {
+  const path = require("path");
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) {
+      return next();
+    }
+    res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
+  });
+}
+
+// 404 handler for API routes
 app.use((req, res) => {
   res.status(404).json({
     error: "Route not found",

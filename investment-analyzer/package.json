@@ -1,0 +1,13 @@
+{
+  "name": "investment-analyzer",
+  "version": "1.0.0",
+  "description": "Monorepo for Investment Analyzer",
+  "scripts": {
+    "install": "npm run install:backend && npm run install:frontend",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "build": "npm run build:frontend",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "cd backend && npm start"
+  }
+}
