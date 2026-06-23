@@ -50,11 +50,11 @@ if (process.env.NODE_ENV === "production") {
   const path = require("path");
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  app.get("*", (req, res, next) => {
-    if (req.path.startsWith("/api")) {
-      return next();
+  app.use((req, res, next) => {
+    if (req.method === "GET" && !req.path.startsWith("/api")) {
+      return res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
     }
-    res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
+    next();
   });
 }
 
